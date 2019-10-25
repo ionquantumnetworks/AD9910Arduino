@@ -16,39 +16,47 @@ void setup() {
 //    data++;
 //    delay(500);}
 //CFR1 Bytes
-  int CFR1InstructionByte = 0x00;
-  int CFR1Byte1 = 0x00;
-  int CFR1Byte2 = 0x00; 
-  int CFR1Byte3 = 0x00; 
-  int CFR1Byte4 = 0x00; 
+  byte CFR1InstructionByte = B0110000;
+  byte CFR1Byte1 = 0x00;
+  byte CFR1Byte2 = 0x00; 
+  byte CFR1Byte3 = 0x00; 
+  byte CFR1Byte4 = 0x00; 
 //CFR2 Bytes
-  int CFR2InstructionByte = 0x01;
-  int CFR2Byte1 = 0x00;
-  int CFR2Byte2 = 0x00; 
-  int CFR2Byte3 = 0x00; 
-  int CFR2Byte4 = 0x00; 
+  byte CFR2InstructionByte = B0110001;
+  byte CFR2Byte1 = 0x01;
+  byte CFR2Byte2 = 0x40; 
+  byte CFR2Byte3 = 0x08; 
+  byte CFR2Byte4 = 0x20; 
 //CFR3 Bytes
-  int CFR3InstructionByte = 0x02;
-  int CFR3Byte1 = 0x00;
-  int CFR3Byte2 = 0x00; 
-  int CFR3Byte3 = 0x00; 
-  int CFR3Byte4 = 0x00; 
+  byte CFR3InstructionByte = B0110010;
+  byte CFR3Byte1 = 0x1F;
+  byte CFR3Byte2 = 0x3F; 
+  byte CFR3Byte3 = 0x40; 
+  byte CFR3Byte4 = 0x00; 
+//Aux DAC control
+  byte ADCInstructionByte = B0110011;;
+  byte ADCByte1 = 0x00;
+  byte ADCByte2 = 0x00; 
+  byte ADCByte3 = 0x7F; 
+  byte ADCByte4 = 0x7F; 
 //Single Tone Data
-  int InstructionByte = 0x0E; //Byte to tell DDS what the following data is
-  int DataByte1 = 0x08; //Amplitude scale factor
-  int DataByte2 = 0xB5; //Amplitude scale factor
-  int DataByte3 = 0x00; //Phase Offset
-  int DataByte4 = 0x00; //Phase Offset
-  int DataByte5 = 0x0A; //Frequency
-  int DataByte6 = 0x3D; //Frequency
-  int DataByte7 = 0x70; //Frequency
-  int DataByte8 = 0xA4; //Frequency
+  byte InstructionByte = B0111110;; //Byte to tell DDS what the following data is
+  byte DataByte1 = 0x20; //Amplitude scale factor
+  byte DataByte2 = 0x00; //Amplitude scale factor
+  byte DataByte3 = 0x00; //Phase Offset
+  byte DataByte4 = 0x00; //Phase Offset
+  byte DataByte5 = 0x14; //Frequency
+  byte DataByte6 = 0x7A; //Frequency
+  byte DataByte7 = 0xE1; //Frequency
+  byte DataByte8 = 0x48; //Frequency
   digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
+  delay(500);
   SPI.transfer(CFR1InstructionByte);
   SPI.transfer(CFR1Byte1);
   SPI.transfer(CFR1Byte2);
   SPI.transfer(CFR1Byte3);
   SPI.transfer(CFR1Byte4);
+  delay(500);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
   delay(500);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
@@ -61,6 +69,7 @@ void setup() {
   SPI.transfer(CFR2Byte2);
   SPI.transfer(CFR2Byte3);
   SPI.transfer(CFR2Byte4);
+  delay(500);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
   delay(500);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
@@ -73,6 +82,33 @@ void setup() {
   SPI.transfer(CFR3Byte2);
   SPI.transfer(CFR3Byte3);
   SPI.transfer(CFR3Byte4);
+  delay(500);
+  digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
+  delay(500);
+  digitalWrite(2, HIGH);//Send the above data to DDS from register
+  delay(500);
+  digitalWrite(2, LOW);//Send the above data to DDS from register
+  delay(500);
+  digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
+  SPI.transfer(ADCInstructionByte);
+  SPI.transfer(ADCByte1);
+  SPI.transfer(ADCByte2);
+  SPI.transfer(ADCByte3);
+  SPI.transfer(ADCByte4);
+  delay(500);
+  digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
+  delay(500);
+  digitalWrite(2, HIGH);//Send the above data to DDS from register
+  delay(500);
+  digitalWrite(2, LOW);//Send the above data to DDS from register
+  delay(500);
+  digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
+  SPI.transfer(0x04);
+  SPI.transfer(0xFF);
+  SPI.transfer(0xFF);
+  SPI.transfer(0xFF);
+  SPI.transfer(0xFF);
+  delay(500);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
   delay(500);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
@@ -89,6 +125,7 @@ void setup() {
   SPI.transfer(DataByte6);
   SPI.transfer(DataByte7);
   SPI.transfer(DataByte8);
+  delay(500);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
   delay(500);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
@@ -99,5 +136,3 @@ void setup() {
 void loop() {
 
 }
-//40 MHz using a 1GHz clock shoud be: 00001010 00111101 01110000 10100100
-//                                      0x0A    0x3D     0x70     0xA4
