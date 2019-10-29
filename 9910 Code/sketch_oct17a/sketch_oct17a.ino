@@ -46,10 +46,10 @@ void setup() {
   byte DataByte2 = B10110101; //Amplitude scale factor
   byte DataByte3 = B00000000; //Phase Offset
   byte DataByte4 = B00000000; //Phase Offset
-  byte DataByte5 = B00000000; //Frequency
-  byte DataByte6 = B01000001; //Frequency
-  byte DataByte7 = B10001001; //Frequency
-  byte DataByte8 = B00110111; //Frequency
+  byte DataByte5 = 0x14; //Frequency
+  byte DataByte6 = 0x7A; //Frequency
+  byte DataByte7 = 0xE1; //Frequency
+  byte DataByte8 = 0x48; //Frequency
   digitalWrite(4, HIGH);//Reset the board
   delay(500);
   digitalWrite(4, LOW);//Reset the board
