@@ -2,7 +2,7 @@
 
 void setup() {
   // initialize SPI:
-  SPISettings settingsA(1000000, MSBFIRST, SPI_MODE0);
+  SPISettings settingsA(20000000, MSBFIRST, SPI_MODE1);
   SPI.begin();
   digitalWrite(SS,HIGH); //the AD9910 reads data when this is low. So set to high to begin
   SPI.setBitOrder(MSBFIRST); //set the data mode to most significant bit. The AD9910 has this as default
@@ -13,7 +13,7 @@ void setup() {
    //CFR1 Bytes
   byte CFR1InstructionByte = B00000000;
   byte CFR1Byte1 = B00000000;
-  byte CFR1Byte2 = B00000000; 
+  byte CFR1Byte2 = B01000000; 
   byte CFR1Byte3 = B00000000; 
   byte CFR1Byte4 = B00000010; //0x00
 //CFR2 Bytes
@@ -51,83 +51,83 @@ void setup() {
   byte DataByte7 = 0xE1; //Frequency
   byte DataByte8 = 0x48; //Frequency
   digitalWrite(4, HIGH);//Reset the board
-  delay(500);
+  delay(5);
   digitalWrite(4, LOW);//Reset the board
   digitalWrite(3, HIGH);//Reset the I/O communication
-  delay(500);
+  delay(5);
   digitalWrite(3, LOW);//Reset the I/O communication
   digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
-  delay(500);
+  delay(5);
   SPI.transfer(CFR1InstructionByte);
   SPI.transfer(CFR1Byte1);
   SPI.transfer(CFR1Byte2);
   SPI.transfer(CFR1Byte3);
   SPI.transfer(CFR1Byte4);
-  delay(500);
+  delay(5);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
-  delay(500);
+  delay(5);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(2, LOW);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
-  delay(500);
+  delay(5);
   SPI.transfer(CFR2InstructionByte);
   SPI.transfer(CFR2Byte1);
   SPI.transfer(CFR2Byte2);
   SPI.transfer(CFR2Byte3);
   SPI.transfer(CFR2Byte4);
-  delay(500);
+  delay(5);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
-  delay(500);
+  delay(5);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(2, LOW);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
-  delay(500);
+  delay(5);
   SPI.transfer(CFR3InstructionByte);
   SPI.transfer(CFR3Byte1);
   SPI.transfer(CFR3Byte2);
   SPI.transfer(CFR3Byte3);
   SPI.transfer(CFR3Byte4);
-  delay(500);
+  delay(5);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
-  delay(500);
+  delay(5);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(2, LOW);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
-  delay(500);
+  delay(5);
   SPI.transfer(ADCInstructionByte);
   SPI.transfer(ADCByte1);
   SPI.transfer(ADCByte2);
   SPI.transfer(ADCByte3);
   SPI.transfer(ADCByte4);
-  delay(500);
+  delay(5);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
-  delay(500);
+  delay(5);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(2, LOW);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
-  delay(500);
+  delay(5);
   SPI.transfer(IOInstructionByte);
   SPI.transfer(IOByte1);
   SPI.transfer(IOByte2);
   SPI.transfer(IOByte3);
   SPI.transfer(IOByte4);
-  delay(500);
+  delay(5);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
-  delay(500);
+  delay(5);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(2, LOW);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(SS,LOW);//set the write line to LOW so that the DDS reads the following data
-  delay(500);
+  delay(5);
   SPI.transfer(InstructionByte);
   SPI.transfer(DataByte1);
   SPI.transfer(DataByte2);
@@ -137,13 +137,12 @@ void setup() {
   SPI.transfer(DataByte6);
   SPI.transfer(DataByte7);
   SPI.transfer(DataByte8);
-  delay(500);
+  delay(5);
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
-  delay(500);
+  delay(5);
   digitalWrite(2, HIGH);//Send the above data to DDS from register
-  delay(500);
+  delay(5);
   digitalWrite(2, LOW);//Send the above data to DDS from register
-
 }
 
 
