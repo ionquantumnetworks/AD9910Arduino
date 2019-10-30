@@ -2,10 +2,10 @@
 
 void setup() {
   // initialize SPI:
-  SPISettings settingsA(25000000, MSBFIRST, SPI_MODE1);
+  SPI.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE2));
   SPI.begin();
   digitalWrite(SS,HIGH); //the AD9910 reads data when this is low. So set to high to begin
-  SPI.setBitOrder(MSBFIRST); //set the data mode to most significant bit. The AD9910 has this as default
+  //SPI.setBitOrder(MSBFIRST); //set the data mode to most significant bit. The AD9910 has this as default
   pinMode(2,OUTPUT); //set pin 2 to be an output pin
   pinMode(3,OUTPUT); //set pin 3 to be an output pin
   pinMode(4,OUTPUT); //set pin 4 to be an output pin
