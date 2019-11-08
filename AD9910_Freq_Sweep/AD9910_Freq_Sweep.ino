@@ -11,15 +11,22 @@ void setup() {
   int IOupdate = 2;
   int IOreset = 3;
   int DRCTL = 5;
-  int DRHOLD = 6;
+  int P0 = 6;
+  int P1 = 7;
+  int P2 = 8;
+  pinMode(P0,OUTPUT);
+  pinMode(P1,OUTPUT);
+  pinMode(P2,OUTPUT);
   pinMode(IOupdate,OUTPUT); //set pin 2 to be an output pin
   pinMode(IOreset,OUTPUT); //set pin 3 to be an output pin
   pinMode(MasterReset,OUTPUT); //set pin 4 to be an output pin
   pinMode(DRCTL, OUTPUT);
-  pinMode(DRHOLD, OUTPUT);
   digitalWrite(IOupdate, LOW); //Set the IOupdate line to LOW as a HIGH value sends data to DDS from register
   digitalWrite(IOreset, LOW); //Set the IOreset line to LOW as a HIGH value resets IO communication
   digitalWrite(MasterReset, LOW); //Set the Master Reset line to LOW as a HIGH value resets chip to default values
+  digitalWrite(P0,LOW);
+  digitalWrite(P1,LOW);
+  digitalWrite(P2,LOW);
 //CFR1 Bytes
   byte CFR1InstructionByte = 0x00; //Instruction Byte to tell DDS what the following data is
   byte CFR1Byte1 = 0x00;
@@ -187,7 +194,13 @@ void loop() {
   int IOreset = 3;
   int DRCTL = 5;
   int DRHOLD = 6;
+  int P0 = 6;
+  int P1 = 7;
+  int P2 = 8;
   int i = 0;
+  digitalWrite(P0,LOW);
+  digitalWrite(P1,LOW);
+  digitalWrite(P2,LOW);
   digitalWrite(IOupdate, LOW); //Set the IOupdate line to LOW as a HIGH value sends data to DDS from register
   digitalWrite(IOreset, LOW); //Set the IOReset line to LOW as a HIGH value resets IO communication
   digitalWrite(MasterReset, LOW); //Set the Master Reset line to LOW as a HIGH value resets chip to default values
