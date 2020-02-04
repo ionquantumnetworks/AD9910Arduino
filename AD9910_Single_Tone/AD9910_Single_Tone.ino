@@ -21,7 +21,7 @@ void setup() {
 //CFR2 Bytes
   byte CFR2InstructionByte = 0x01;
   byte CFR2Byte1 = 0x01; //0x01 to enable single tone amplitude data
-  byte CFR2Byte2 = 0x00; //0x40 to enable SYNC_CLK output
+  byte CFR2Byte2 = 0x40; //0x40 to enable SYNC_CLK output
   byte CFR2Byte3 = 0x08; 
   byte CFR2Byte4 = 0x20; 
 //CFR3 Bytes
