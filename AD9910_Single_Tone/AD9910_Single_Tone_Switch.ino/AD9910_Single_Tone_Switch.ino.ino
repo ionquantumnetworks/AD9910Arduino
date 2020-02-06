@@ -1,5 +1,5 @@
 #include <SPI.h>
-//Arduino setup: Remove jumpers: W3, W5, W6. Set jumpers W1, W2 and W4 to disable. Place jumpers on P_0, P_1, P_2 and EXT_PWR_DWN
+//Arduino setup: Remove jumpers: W3, W5, W6. Set jumpers W1, W2 and W4 to disable. Place jumper on EXT_PWR_DWN
 
 void setup() {
   // initialize SPI:
@@ -36,7 +36,7 @@ void setup() {
 //CFR2 Bytes
   byte CFR2InstructionByte = 0x01;
   byte CFR2Byte1 = 0x01; //0x01 to enable single tone amplitude data
-  byte CFR2Byte2 = 0x40; //0x40 to enable SYNC_CLK output
+  byte CFR2Byte2 = 0x00; //0x40 to enable SYNC_CLK output
   byte CFR2Byte3 = 0x08; 
   byte CFR2Byte4 = 0x20; 
 //CFR3 Bytes
@@ -182,8 +182,8 @@ void loop() {
   digitalWrite(SS,HIGH);//set the write line to HIGH so that the DDS stops reading
   while(i < 100){
     digitalWrite(P0,LOW);
-    delay(10);
+    delay(0.01);
     digitalWrite(P0,HIGH);
-    delay(10);
+    delay(0.01);
   }
 }
