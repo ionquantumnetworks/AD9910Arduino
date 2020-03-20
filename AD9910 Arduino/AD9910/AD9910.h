@@ -4,7 +4,7 @@
 #pragma once //Makes sure this file is included only once in  a single compilation.
 
 # define uchar unsigned char //specifying shorthand for unsigned charater
-# define CLOCKSPEED  15000000//Clockspeed used for SPI serial communication between arduino and AD9910... setting to 15 MHz... James had it at 25 MHz - should check
+# define CLOCKSPEED  25000000//Clockspeed used for SPI serial communication between arduino and AD9910... setting to 15 MHz... James had it at 25 MHz - should check
 
 # include <SPI.h> //SPI interface that arduino and other microcontrollers use to communicate with slave devices
 # include <stdint.h>
@@ -43,9 +43,11 @@ class AD9910
 			digitalWrite(_cs, HIGH);
 			digitalWrite(_rst, LOW);
 			digitalWrite(_update, LOW);
-			
+			delay(5);
 			reset();
+      delay(5);
 			initialize();
+      delay(5);
 		}
 		
 		//WE SHOULD PLAY WITH REMOVING THE DELAYS AT SOME POINT
@@ -56,7 +58,7 @@ class AD9910
 		void reset()
 		{
 			digitalWrite(_rst, HIGH);
-			delay(1);
+			delay(5);
 			digitalWrite(_rst, LOW);
 		}
 
@@ -66,7 +68,7 @@ class AD9910
 		void update() 
 		{
 			digitalWrite(_update, HIGH);
-			delay(1);
+			delay(5);
 			digitalWrite(_update, LOW);
 		}
 
@@ -74,10 +76,10 @@ class AD9910
 
 		void SPI_Write_Reg(uint8_t addr, uint8_t bytes[], uint8_t num_bytes) //addr corresponds to the serial addresses or register names given in the AD9910 manual, just use the hex to designate what register you want to change
 		{
-			SPI.beginTransaction(SPISettings(CLOCKSPEED, MSBFIRST, SPI_MODE2)); //code from xxx uses mode0, James used MODE 2 - should check 
+			SPI.beginTransaction(SPISettings(CLOCKSPEED, MSBFIRST, SPI_MODE0)); //code from xxx uses mode0, James used MODE 2 - should check 
 			digitalWrite(_cs, LOW);
 			SPI.transfer(addr); //First byte of transfer selects which register we are writing to
-			delay(1); //potentially optional delay
+			delay(5); //potentially optional delay
 			for (int i = 0; i < num_bytes; i++) {//for loop that sends the bytes from the byte array bytes[] to the SPI device
 				SPI.transfer(bytes[i]);
 			}
@@ -91,15 +93,15 @@ class AD9910
 		{
 			//Load standard control function registers - this will need to potentially change when we want to do frequency sweeps
 			SPI_Write_Reg(0x00, cfr1, 4); //0x00 corresponds to cfr1 address, similar notation used in the next few lines
-			delay(1);
+			delay(5);
 			SPI_Write_Reg(0x01, cfr2, 4);
-			delay(1);
+			delay(5);
 			SPI_Write_Reg(0x02, cfr3, 4);
-			delay(1);
+			delay(5);
 			SPI_Write_Reg(0x03, DAC_config, 4); //James doesn't have this in his code.. not sure how necessary
-			delay(1);
+			delay(5);
 			update(); //transfer from buffer to internal register
-			delay(1);
+			delay(5);
 		}
 
 		//Function to set frequency for a profile in single frequency mode
