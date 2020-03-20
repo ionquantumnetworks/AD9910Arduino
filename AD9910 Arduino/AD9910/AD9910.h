@@ -12,21 +12,21 @@
 class AD9910
 {
 	public:
-		int _cs, _rst, _update, _sdio, _sclk, _mrst; //choose slave? I believe this is equivalent to SS that james was using, pin 10, should be low for slave you are writing to, reset, update, serial data input output , system clock
+		int _cs, _rst, _update, _sdio, _sclk, _mrst; //slave selection pin (pin 10, should be low for slave you are writing to), reset, update, serial data input output , system clock
 		uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x00 }; //Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
 		uint8_t cfr2[4] = { 0x01, 0x00, 0x08, 0x20 }; //Define Control Function Register 2 default values as originally figured out by James
 		uint8_t cfr3[4] = { 0x1F, 0x3F, 0x40, 0x00 }; //Define Control Function Register 3 default values as originally figured out by James
 		uint8_t DAC_config[4] = { 0x00, 0x00, 0x00, 0x7F }; //Onboard Auxillary DAC control register, default is 0x7F
 		uint8_t Profile0[8] = { 0x08, 0xB5, 0x00, 0x00, 0x14, 0x7A, 0xE1, 0x48 }; //Single Frequency or RAM profile, depending on control register settings. Bytes organized as :{amplitude, amplitude, phase, phase, freq, freq, freq ,freq}
 	//Constructor
-		AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst) //In main program, I believe this defines which pins are which... I will check this
+		AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst) //this defines which pins are which via integer corresponding to a pin on the arduino board
 		{
 			_cs = cs;
 			_rst = rst;
 			_update = update;
 			_sdio = sdio; //Check if we want this unidirectional or bidirectional
 			_sclk = sclk;
-      _mrst = mrst;
+			_mrst = mrst;
 		}
 
 	//Init IO
@@ -39,20 +39,20 @@ class AD9910
 			pinMode(_update, OUTPUT);
 			pinMode(_sdio, OUTPUT);
 			pinMode(_sclk, OUTPUT);
-      pinMode(_mrst, OUTPUT);
+			pinMode(_mrst, OUTPUT);
 			
 			//Set pins High or Low
 			digitalWrite(_cs, HIGH);
 			digitalWrite(_rst, LOW);
 			digitalWrite(_update, LOW);
-      digitalWrite(_mrst, LOW);
+			digitalWrite(_mrst, LOW);
 			delay(5);
-      master_reset();
-      delay(5);
+			master_reset();
+			delay(5);
 			reset();
-      delay(5);
+			delay(5);
 			initialize();
-      delay(5);
+			delay(5);
 		}
 		
 		//WE SHOULD PLAY WITH REMOVING THE DELAYS AT SOME POINT
@@ -60,13 +60,13 @@ class AD9910
 		//Define IO reset function
 		//Takes reset pin high then low - using delay inbetween that is shorter than what James used
 
-    void master_reset()
-    {
-        digitalWrite(_mrst, HIGH);
-        delay(5);
-        digitalWrite(_mrst,LOW);
-        delay(5);
-    }
+		void master_reset()
+		 {
+			 digitalWrite(_mrst, HIGH);
+			 delay(5);
+			 digitalWrite(_mrst,LOW);
+			 delay(5);
+		 }
     
 		void reset()
 		{
@@ -156,3 +156,8 @@ class AD9910
 			update();
 		}
 };
+
+//For Frequency Sweep, functions that need to change: 
+// -initialize
+// -optional trigger pin (5)
+// -potentially set_freq and set_amp need to be edited to do nothing if sweep mode is enabled. It is possible you can still set profiles even while in sweep mode... I will check via trial and error
