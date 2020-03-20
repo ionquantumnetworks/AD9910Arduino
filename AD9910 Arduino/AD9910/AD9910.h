@@ -12,20 +12,21 @@
 class AD9910
 {
 	public:
-		int _cs, _rst, _update, _sdio, _sclk; //choose slave? I believe this is equivalent to SS that james was using, pin 10, should be low for slave you are writing to, reset, update, serial data input output , system clock
+		int _cs, _rst, _update, _sdio, _sclk, _mrst; //choose slave? I believe this is equivalent to SS that james was using, pin 10, should be low for slave you are writing to, reset, update, serial data input output , system clock
 		uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x00 }; //Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
 		uint8_t cfr2[4] = { 0x01, 0x00, 0x08, 0x20 }; //Define Control Function Register 2 default values as originally figured out by James
 		uint8_t cfr3[4] = { 0x1F, 0x3F, 0x40, 0x00 }; //Define Control Function Register 3 default values as originally figured out by James
 		uint8_t DAC_config[4] = { 0x00, 0x00, 0x00, 0x7F }; //Onboard Auxillary DAC control register, default is 0x7F
 		uint8_t Profile0[8] = { 0x08, 0xB5, 0x00, 0x00, 0x14, 0x7A, 0xE1, 0x48 }; //Single Frequency or RAM profile, depending on control register settings. Bytes organized as :{amplitude, amplitude, phase, phase, freq, freq, freq ,freq}
 	//Constructor
-		AD9910(int cs, int rst, int update, int sdio, int sclk) //In main program, I believe this defines which pins are which... I will check this
+		AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst) //In main program, I believe this defines which pins are which... I will check this
 		{
 			_cs = cs;
 			_rst = rst;
 			_update = update;
 			_sdio = sdio; //Check if we want this unidirectional or bidirectional
 			_sclk = sclk;
+      _mrst = mrst;
 		}
 
 	//Init IO
@@ -38,12 +39,16 @@ class AD9910
 			pinMode(_update, OUTPUT);
 			pinMode(_sdio, OUTPUT);
 			pinMode(_sclk, OUTPUT);
+      pinMode(_mrst, OUTPUT);
 			
 			//Set pins High or Low
 			digitalWrite(_cs, HIGH);
 			digitalWrite(_rst, LOW);
 			digitalWrite(_update, LOW);
+      digitalWrite(_mrst, LOW);
 			delay(5);
+      master_reset();
+      delay(5);
 			reset();
       delay(5);
 			initialize();
@@ -55,6 +60,14 @@ class AD9910
 		//Define IO reset function
 		//Takes reset pin high then low - using delay inbetween that is shorter than what James used
 
+    void master_reset()
+    {
+        digitalWrite(_mrst, HIGH);
+        delay(5);
+        digitalWrite(_mrst,LOW);
+        delay(5);
+    }
+    
 		void reset()
 		{
 			digitalWrite(_rst, HIGH);
@@ -115,7 +128,7 @@ class AD9910
 			if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
 				freq = 200000000;
 			}
-			temp = freq * 4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
+			temp = freq * 8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
 
 			Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
 			Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
