@@ -13,7 +13,7 @@ class AD9910
 {
 public:
 	int _cs, _rst, _update, _sdio, _sclk, _mrst, _sTrig; //slave selection pin (pin 10, should be low for slave you are writing to), reset, update, serial data input output , system clock , master reset, sweep trigger
-	uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x00 }; //Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
+	uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x00 }; //what may be causing unwated jumps in signal is the 0x20 which makes the phase accumlator reset on updates. Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
 	uint8_t cfr2[4] = { 0x01, 0x00, 0x08, 0x20 }; //Define Control Function Register 2 default values as originally figured out by James
 	uint8_t cfr3[4] = { 0x1F, 0x3F, 0x40, 0x00 }; //Define Control Function Register 3 default values as originally figured out by James
 	uint8_t DAC_config[4] = { 0x00, 0x00, 0x00, 0x7F }; //Onboard Auxillary DAC control register, default is 0x7F
@@ -125,6 +125,7 @@ public:
 	void set_freq(double freq, uint8_t profile = 0) //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in Hz
 	{
 		if (profile > 7) { //protection against a impossible profile number
+			Serial.println("Invalid Profile Number.");
 			return;
 		}
 		unsigned long temp; //temp variable for frequency calculations
@@ -140,6 +141,28 @@ public:
 
 		SPI_Write_Reg(0x0E + profile, Profile0, 8);
 		update();
+	}
+
+	//A function we may need, that preps a profile to be rewritten, but does not send an update command.  
+
+	void prep_freq(double freq, uint8_t profile = 0)
+	{
+		if (profile > 7) { //protection against a impossible profile number
+			Serial.println("Invalid Profile Number.");
+			return;
+		}
+		unsigned long temp; //temp variable for frequency calculations
+		if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
+			freq = 200000000;
+		}
+		temp = freq * 8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
+
+		Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
+		Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
+		Profile0[5] = (uchar)(temp >> 16);
+		Profile0[4] = (uchar)(temp >> 24);
+
+		SPI_Write_Reg(0x0E + profile, Profile0, 8);
 	}
 
 	//Function to set amplitude for a profile in single frequency mode
@@ -159,9 +182,121 @@ public:
 		update();
 	}
 
-	void singleFreqMode() {}
+	//Function to swap to singleFreqMode - it may be that we want to do a separate update if we want to prep this before firing
 
-	void freqSweepMode() {}
+	void singleFreqMode(){}
+
+	//Function to swap to a frequency sweep - will assume parameters are already set
+	//mode 0 = default mode
+	//mode 1 = no dwell high
+	//mode 2 = no dwell low
+	//mode 3 = oscillatory
+
+	void freqSweepMode(int mode = 0) //still need to write
+	{
+		if (mode = 0) 
+		{
+			cfr2[2] = 0x08;
+		}
+		else if (mode = 1)
+		{
+			cfr2[2] = 0x0C;
+		}
+		else if (mode = 2)
+		{
+			cfr2[2] = 0x0A;
+		}
+		else if (mode = 3)
+		{
+			cfr2[2] = 0x0E;
+		}
+		else
+		{
+			Serial.println("Invalid mode selection, will go to default sweep mode.");
+			cfr2[2] = 0x08;
+		}
+
+		SPI_Write_Reg(0x01, cfr2, 4);
+		update();
+
+	}
+
+	//Function to swap to an amplitude sweep
+
+	void ampSweepMode(){}
+
+	//Function to swap to a phase sweep
+
+	void phaseSweepMode(){}
+
+	//Allow for frequency sweep paramters to be changed independently of turning the sweep on?
+	//Do global amplitude/phase settings apply here?
+
+	void freqSweepParameters(double ULim, double LLim, double stepsizeDown, double stepsizeUp, double timeStepDown, double timeStepUp)
+	{
+		//Keep values within bounds defined by our reference clock divided by 2 (known as SYSCLOCK)
+		if (ULim > 200000000 || ULim < 0)
+		{
+			ULim = 200000000;
+			Serial.println("Upper Limit out of bounds, setting to 200 MHz");
+		}
+		if (LLim > 200000000 || ULim < 0)
+		{
+			LLim = 0;
+			Serial.println("Lower Limit out of bounds, setting to 0 MHz");
+		}
+		if (stepsizeDown > 200000000)
+		{
+			stepsizeDown = 200000000;
+			Serial.println("Step size down too large, setting to 200 MHz");
+		}
+		if (stepsizeUp > 200000000)
+		{
+			stepsizeUp = 200000000);
+			Serial.println("Step size up too large, setting to 200 MHz");
+		}
+		if (stepsizeDown < 0.11641532182)
+		{
+			stepsizeDown = 0.11641532182;
+			Serial.println("Step size down too small, setting to 0.11641532182 Hz");
+		}
+		if (stepsizeUp < 0.11641532182)
+		{
+			stepsizeUp = 0.11641532182;
+			Serial.println("Step size up too small, setting to 0.11641532182 Hz");
+		}
+		if (timeStepDown > 0.000524288)
+		{
+			timeStepDown = 0.000524288;
+			Serial.println("Decrement time step too small, setting to 524.288 us");
+		}
+		if (timeStepUp > 0.000524288)
+		{
+			timeStepUp = 0.000524288;
+			Serial.println("Increment time step too small, setting to 524.288 us");
+		}
+		if (timeStepDown < 0.000000008)
+		{
+			timeStepDown = 0.000000008;
+			Serial.println("Decrement time step too small, setting to 8 ns");
+		}
+		if (timeStepUp < 0.000000008)
+		{
+			timeStepUp = 0.000000008;
+			Serial.println("Increment time step too small, setting to 8 ns");
+		}
+		//Here will go calculation of all tuning words... taking a break now.
+	}
+
+	void rampReset()
+	{
+		cfr1[3] = 0x30;
+		SPI_Write_Reg(0x00, cfr1, 4);
+		update();
+		cfr1[3] = 0x20;
+		SPI_Write_Reg(0x00, cfr1, 4);
+		update();
+	} //Reset ramp using digiatl ramp accumluator reset set bit 12 of CFR1 to 1 then do I/O update, then set back to 0 and I/O update
 };
 
 //For Frequency Sweep, functions that need to change: 
