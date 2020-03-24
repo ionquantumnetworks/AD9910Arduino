@@ -260,7 +260,7 @@ public:
 		}
 		if (stepsizeUp > 200000000)
 		{
-			stepsizeUp = 200000000);
+			stepsizeUp = 200000000;
 			Serial.println("Step size up too large, setting to 200 MHz");
 		}
 		if (stepsizeDown < 0.11641532182)
@@ -295,7 +295,7 @@ public:
 		}
 		if (LLim > ULim)
 		{
-			Serial.println("Lower limit is larger than upper limit... expect weird stuff.")
+			Serial.println("Lower limit is larger than upper limit... expect weird stuff.");
 		}
 		//calculation of tuning words using temp variables... separate variables for diagnostics.. could just redefine a single variable after each calculation
 		//UL - upper limit, LL - lower limit, SD - stepsize down, SU - stepsize up, TD - timestep down, TU - timestep up
