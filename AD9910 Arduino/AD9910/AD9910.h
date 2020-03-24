@@ -200,7 +200,7 @@ public:
 	//mode 2 = no dwell low
 	//mode 3 = oscillatory
 
-	void freqSweepMode(int mode = 0) //still need to write
+	void freqSweepMode(int mode = 0) 
 	{
 		if (mode = 0) 
 		{
