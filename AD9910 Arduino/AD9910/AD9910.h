@@ -155,7 +155,7 @@ public:
 
 	void prep_freq(double freq, uint8_t profile = 0)
 	{
-		if (profile > 7) { //protection against a impossible profile number
+		if (profile > 7) { //protection against a impossible profile number.. need to make this work for negative or invalid data types as well..
 			Serial.println("Invalid Profile Number.");
 			return;
 		}
@@ -163,7 +163,7 @@ public:
 		if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
 			freq = 200000000;
 		}
-		temp = freq * 8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
+		temp = freq * FTWConst;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
 
 		Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
 		Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
@@ -178,7 +178,7 @@ public:
 	void set_Amp(double amp, uint8_t profile = 0)
 	{
 		unsigned long temp;
-		temp = (unsigned long)amp * 25.20615385; //amplitude tuning word.. need to check math
+		temp = (unsigned long)amp * 25.20615385; //amplitude tuning word.. need to check math and need to make this a global variable
 		if (temp > 0x3FFF) {
 			temp = 0x3FFF;
 		}
