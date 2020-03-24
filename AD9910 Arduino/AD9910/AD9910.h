@@ -5,6 +5,8 @@
 
 # define uchar unsigned char //specifying shorthand for unsigned charater
 # define CLOCKSPEED  25000000//Clockspeed used for SPI serial communication between arduino and AD9910... setting to 15 MHz... James had it at 25 MHz - should check
+# define FTWConst 8.589934592 // constant needed to calculate frequency tuning word using 1 GHz clock "fref" divided by 2 into 500 MHz "fsysclock"
+# define TTWConst 125000000 // constant used to calculate time step. equal to fsysclock/4 or 500 MHz/ 4 = 125 MHz.
 
 # include <SPI.h> //SPI interface that arduino and other microcontrollers use to communicate with slave devices
 # include <stdint.h>
@@ -13,11 +15,17 @@ class AD9910
 {
 public:
 	int _cs, _rst, _update, _sdio, _sclk, _mrst, _sTrig; //slave selection pin (pin 10, should be low for slave you are writing to), reset, update, serial data input output , system clock , master reset, sweep trigger
+	//Control and general settings registers
 	uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x00 }; //what may be causing unwated jumps in signal is the 0x20 which makes the phase accumlator reset on updates. Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
 	uint8_t cfr2[4] = { 0x01, 0x00, 0x08, 0x20 }; //Define Control Function Register 2 default values as originally figured out by James
 	uint8_t cfr3[4] = { 0x1F, 0x3F, 0x40, 0x00 }; //Define Control Function Register 3 default values as originally figured out by James
 	uint8_t DAC_config[4] = { 0x00, 0x00, 0x00, 0x7F }; //Onboard Auxillary DAC control register, default is 0x7F
+	//Single Frequency Register
 	uint8_t Profile0[8] = { 0x08, 0xB5, 0x00, 0x00, 0x14, 0x7A, 0xE1, 0x48 }; //Single Frequency or RAM profile, depending on control register settings. Bytes organized as :{amplitude, amplitude, phase, phase, freq, freq, freq ,freq}
+	//Sweep registers
+	uint8_t SweepLimits[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //First 4 bytes make upper limit FTW, last 4 lower limit FTW. 
+	uint8_t FreqStepSize[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //First 4 bytes make decrement size FTW, last 4 increment size FTW.
+	uint8_t TimeStepSize[4] = { 0x00, 0x00, 0x00, 0x00 }; // First 2 bytes are decrement time step tuning word, last 2 increment time step tuning word.
 //Constructor
 	AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst, int sTrig) //this defines which pins are which via integer corresponding to a pin on the arduino board
 	{
@@ -132,7 +140,7 @@ public:
 		if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
 			freq = 200000000;
 		}
-		temp = freq * 8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
+		temp = freq * FTWConst;//8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
 
 		Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
 		Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
@@ -240,7 +248,7 @@ public:
 			ULim = 200000000;
 			Serial.println("Upper Limit out of bounds, setting to 200 MHz");
 		}
-		if (LLim > 200000000 || ULim < 0)
+		if (LLim > 200000000 || LLim < 0)
 		{
 			LLim = 0;
 			Serial.println("Lower Limit out of bounds, setting to 0 MHz");
@@ -285,7 +293,56 @@ public:
 			timeStepUp = 0.000000008;
 			Serial.println("Increment time step too small, setting to 8 ns");
 		}
-		//Here will go calculation of all tuning words... taking a break now.
+		if (LLim > ULim)
+		{
+			Serial.println("Lower limit is larger than upper limit... expect weird stuff.")
+		}
+		//calculation of tuning words using temp variables... separate variables for diagnostics.. could just redefine a single variable after each calculation
+		//UL - upper limit, LL - lower limit, SD - stepsize down, SU - stepsize up, TD - timestep down, TU - timestep up
+		unsigned long tempUL;
+		unsigned long tempLL;
+		unsigned long tempSD;
+		unsigned long tempSU;
+		unsigned long tempTD;
+		unsigned long tempTU;
+		//calcuation of tuning words
+		//frequency
+		tempUL = ULim * FTWConst;
+		tempLL = LLim * FTWConst;
+		tempSD = stepsizeDown * FTWConst;
+		tempSU = stepsizeUp * FTWConst;
+		//time
+		tempTD = timeStepDown * TTWConst;
+		tempTU = timeStepUp * TTWConst;
+		/////
+		//loading values into DDS
+		SweepLimits[7] = (uchar)tempLL; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
+		SweepLimits[6] = (uchar)(tempLL >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
+		SweepLimits[5] = (uchar)(tempLL >> 16);
+		SweepLimits[4] = (uchar)(tempLL >> 24);
+		SweepLimits[3] = (uchar)tempUL;
+		SweepLimits[2] = (uchar)(tempUL >> 8);
+		SweepLimits[1] = (uchar)(tempUL >> 16);
+		SweepLimits[0] = (uchar)(tempUL >> 24);
+
+		FreqStepSize[7] = (uchar)tempSU;
+		FreqStepSize[6] = (uchar)(tempSU >> 8);
+		FreqStepSize[5] = (uchar)(tempSU >> 16);
+		FreqStepSize[4] = (uchar)(tempSU >> 24);
+		FreqStepSize[3] = (uchar)tempSD;
+		FreqStepSize[2] = (uchar)(tempSD >> 8);
+		FreqStepSize[1] = (uchar)(tempSD >> 16);
+		FreqStepSize[0] = (uchar)(tempSD >> 24);
+
+		TimeStepSize[3] = (uchar)tempTU;
+		TimeStepSize[2] = (uchar)(tempTU >> 8);
+		TimeStepSize[1] = (uchar)(tempTU >> 16);
+		TimeStepSize[0] = (uchar)(tempTU >> 24);
+
+		SPI_Write_Reg(0x0B, SweepLimits, 8);
+		SPI_Write_Reg(0x0C, FreqStepSize, 8);
+		SPI_Write_Reg(0x0D, TimeStepSize, 8);
+		//update() may go here in the future
 	}
 
 	void rampReset()
