@@ -1,6 +1,8 @@
 //This is the header file for the Arduino Code to control an AD9910 DDS chip. 
 //It contains, or should be edited to contain all functions needed to operate the AD9910 using an Arduino Uno.
-//This code is heavily based on code written by A-suozhang
+//This should be accompanied by the AD9910.cpp file, which serves as the library
+//Based on code written by A-suozhang AD9910-Booster-Arduino - can be found on github "https://github.com/A-suozhang/AD9910-Booster-Arduino"
+
 #pragma once //Makes sure this file is included only once in  a single compilation.
 
 # define uchar unsigned char //specifying shorthand for unsigned charater
@@ -14,7 +16,7 @@
 class AD9910
 {
 public:
-	int _cs, _rst, _update, _sdio, _sclk, _mrst, _sTrig; //slave selection pin (pin 10, should be low for slave you are writing to), reset, update, serial data input output , system clock , master reset, sweep trigger
+	int _cs, _rst, _update, _sdio, _sclk, _mrst, _sTrig; //slave selection pin (pin 10, should be low for slave you are writing to), reset, update, serial data input output , system clock , master reset, sweep trigger// can probably be private....
 	//Control and general settings registers
 	uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x00 }; //what may be causing unwated jumps in signal is the 0x20 which makes the phase accumlator reset on updates. Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
 	uint8_t cfr2[4] = { 0x01, 0x00, 0x08, 0x20 }; //Define Control Function Register 2 default values as originally figured out by James
