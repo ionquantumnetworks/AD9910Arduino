@@ -310,4 +310,3 @@ void AD9910::rampReset()
 	SPI_Write_Reg(0x00, cfr1, 4);
 	update();
 } //Reset ramp using digiatl ramp accumluator reset set bit 12 of CFR1 to 1 then do I/O update, then set back to 0 and I/O update
-};
