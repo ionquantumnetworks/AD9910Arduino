@@ -111,7 +111,7 @@ void AD9910::initialize()
 	delay(5);
 }
 
-void AD9910::set_freq(double freq, uint8_t profile = 0) //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in Hz
+void AD9910::set_freq(double freq, uint8_t profile) //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in Hz
 {
 	if (profile > 7) { //protection against a impossible profile number
 		Serial.println("Invalid Profile Number.");
@@ -132,7 +132,7 @@ void AD9910::set_freq(double freq, uint8_t profile = 0) //default profile set to
 	update();
 }
 
-void AD9910::prep_freq(double freq, uint8_t profile = 0)
+void AD9910::prep_freq(double freq, uint8_t profile)
 {
 	if (profile > 7) { //protection against a impossible profile number.. need to make this work for negative or invalid data types as well..
 		Serial.println("Invalid Profile Number.");
@@ -152,7 +152,7 @@ void AD9910::prep_freq(double freq, uint8_t profile = 0)
 	SPI_Write_Reg(0x0E + profile, Profile0, 8);
 }
 
-void AD9910::set_Amp(double amp, uint8_t profile = 0) //Function to set amplitude for a profile in single frequency mode
+void AD9910::set_Amp(double amp, uint8_t profile) //Function to set amplitude for a profile in single frequency mode
 {
 	unsigned long temp;
 	temp = (unsigned long)amp * 25.20615385; //amplitude tuning word.. need to check math and need to make this a global variable
@@ -167,7 +167,7 @@ void AD9910::set_Amp(double amp, uint8_t profile = 0) //Function to set amplitud
 	update();
 }
 
-void AD9910::freqSweepMode(int mode = 0)
+void AD9910::freqSweepMode(int mode)
 {
 	if (mode = 0)
 	{
