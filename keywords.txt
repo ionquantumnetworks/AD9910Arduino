@@ -1,0 +1,15 @@
+AD9910	KEYWORD1
+begin	KEYWORD2
+master_reset	KEYWORD2
+reset	KEYWORD2
+update	KEYWORD2
+initialize	KEYWORD2
+set_freq	KEYWORD2
+prep_freq	KEYWORD2
+set_Amp	KEYWORD2
+singleFreqMode	KEYWORD2
+freqSweepMode	KEYWORD2
+ampSweepMode	KEYWORD2
+phaseSweepMode	KEYWORD2
+freqSweepParameters KEYWORD2
+rampReset KEYWORD2
