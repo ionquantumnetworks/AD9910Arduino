@@ -27,6 +27,10 @@ public:
 	uint8_t SweepLimits[8]; //First 4 bytes make upper limit FTW, last 4 lower limit FTW. 
 	uint8_t FreqStepSize[8]; //First 4 bytes make decrement size FTW, last 4 increment size FTW.
 	uint8_t TimeStepSize[4]; // First 2 bytes are decrement time step tuning word, last 2 increment time step tuning word.
+
+	//Amplitude Scale Factor Register 0x09
+	uint8_t ASF[4];
+
 //Constructor
 	AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst, int sTrig); //this defines which pins are which via integer corresponding to a pin on the arduino board
 
@@ -102,6 +106,10 @@ public:
 	void OSKenable(int mode = 0);
 
 	void OSKdisable();
+
+	void setAmpScaleFactor();
+
+	void setOSKRampRate();
 };
 
 //For Frequency Sweep, functions that need to change: 
