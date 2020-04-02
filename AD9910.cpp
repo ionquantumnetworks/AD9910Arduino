@@ -345,6 +345,7 @@ void AD9910::OSKenable(int mode)
 		Serial.println("Invalid Mode");
 		return;
 	}
+	update();
 }
 
 void AD9910::OSKdisable()
@@ -353,4 +354,5 @@ void AD9910::OSKdisable()
 	//for testing purposes only
 	Serial.print("Control Register 1[2] value: ");
 	Serial.println(cfr1[2],BIN);
+	update();
 }
