@@ -174,24 +174,33 @@ void AD9910::freqSweepMode(int mode)
 	//mode 3 = oscillatory
 	if (mode == 0)
 	{
-		cfr2[1] = 0x08;
+		cfr2[1] = cfr2[1] | 0x08; //turn on bit 3
+		cfr2[1] = cfr2[1] & 0xF9; //turn off bits 2 and 1
+		//cfr2[1] = 0x08;//old way of rewriting entire register.
 	}
 	else if (mode == 1)
 	{
-		cfr2[1] == 0x0C;
+		cfr2[1] = cfr2[1] | 0x0C; // turn on bits 3 and 2
+		cfr2[1] = cfr2[1] & 0xFD; // turn off bit 1
+		//cfr2[1] = 0x0C;//old way of rewriting entire register
 	}
 	else if (mode == 2)
 	{
-		cfr2[1] == 0x0A;
+		cfr2[1] = cfr2[1] | 0x0A; //turn on bits 3 and 1
+		cfr2[1] = cfr2[1] & 0xFB; //turn off bit 2
+		//cfr2[1] = 0x0A;//old way of rewriting entire register
 	}
 	else if (mode == 3)
 	{
-		cfr2[1] = 0x0E;
+		cfr2[1] = cfr2[1] | 0x0E; //turn on bits 3 2 and 1
+		//cfr2[1] = 0x0E;// old way of rewriting entire register
 	}
 	else
 	{
 		Serial.println("Invalid mode selection, will go to default sweep mode.");
-		cfr2[1] = 0x08;
+		cfr2[1] = cfr2[1] | 0x08; //turn on bit 3
+		cfr2[1] = cfr2[1] & 0xF9; //turn off bits 2 and 1
+		//cfr2[1] = 0x08;//old way of rewriting entire register.
 	}
 
 	SPI_Write_Reg(0x01, cfr2, 4);
@@ -302,14 +311,17 @@ void AD9910::freqSweepParameters(double ULim, double LLim, double stepsizeDown, 
 	SPI_Write_Reg(0x0C, FreqStepSize, 8);
 	SPI_Write_Reg(0x0D, TimeStepSize, 8);
 	//update() may go here in the future
+	update();
 }
 
 void AD9910::rampReset()
 {
-	cfr1[2] = 0x30;
+	cfr2[2] = cfr2[2] | 0x10;
+	//cfr1[2] = 0x30;//Old way of rewriting entire register. Replace with turning on bit 4 only and leaving all else the same.
 	SPI_Write_Reg(0x00, cfr1, 4);
 	update();
-	cfr1[2] = 0x20;
+	cfr2[2] = cfr2[2] & 0xEF;
+	//cfr1[2] = 0x20;//Old way of rewriting register. Replace with turning off only bit 4 and leaving all else the same.
 	SPI_Write_Reg(0x00, cfr1, 4);
 	update();
 } //Reset ramp using digiatl ramp accumluator reset set bit 12 of CFR1 to 1 then do I/O update, then set back to 0 and I/O update
