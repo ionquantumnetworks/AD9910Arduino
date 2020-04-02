@@ -174,24 +174,24 @@ void AD9910::freqSweepMode(int mode)
 	//mode 3 = oscillatory
 	if (mode == 0)
 	{
-		cfr2[2] = 0x08;
+		cfr2[1] = 0x08;
 	}
 	else if (mode == 1)
 	{
-		cfr2[2] == 0x0C;
+		cfr2[1] == 0x0C;
 	}
 	else if (mode == 2)
 	{
-		cfr2[2] == 0x0A;
+		cfr2[1] == 0x0A;
 	}
 	else if (mode == 3)
 	{
-		cfr2[2] = 0x0E;
+		cfr2[1] = 0x0E;
 	}
 	else
 	{
 		Serial.println("Invalid mode selection, will go to default sweep mode.");
-		cfr2[2] = 0x08;
+		cfr2[1] = 0x08;
 	}
 
 	SPI_Write_Reg(0x01, cfr2, 4);
@@ -306,10 +306,10 @@ void AD9910::freqSweepParameters(double ULim, double LLim, double stepsizeDown, 
 
 void AD9910::rampReset()
 {
-	cfr1[3] = 0x30;
+	cfr1[2] = 0x30;
 	SPI_Write_Reg(0x00, cfr1, 4);
 	update();
-	cfr1[3] = 0x20;
+	cfr1[2] = 0x20;
 	SPI_Write_Reg(0x00, cfr1, 4);
 	update();
 } //Reset ramp using digiatl ramp accumluator reset set bit 12 of CFR1 to 1 then do I/O update, then set back to 0 and I/O update
@@ -319,26 +319,26 @@ void AD9910::OSKenable(int mode)
 	//mode 0 = manual
 	//mode 1 = auto
 	if (mode == 0)
-	{
+	{	//Turn on control register 1 bits 23 and 9, turn off bit 8
 		cfr1[1] = cfr1[1] | 0x80;
 		cfr1[2] = cfr1[2] | 0x02;
 		cfr1[2] = cfr1[2] & 0xFE;
 		SPI_Write_Reg(0x00, cfr1, 4);
 		//for testing purposes only
-		Serial.print("Control Register 1[1] value: ");
-		Serial.println(cfr1[1], BIN);
-		Serial.print("Control Register 1[2] value: ");
-		Serial.println(cfr1[2], BIN);
+		//Serial.print("Control Register 1[1] value: ");
+		//Serial.println(cfr1[1], BIN);
+		//Serial.print("Control Register 1[2] value: ");
+		//Serial.println(cfr1[2], BIN);
 	}
 	else if (mode == 1)
-	{
+	{	//turn on control register bits 9 and 8
 		cfr1[2] = cfr1[2] | 0x03;
 		SPI_Write_Reg(0x00, cfr1, 4);
 		//for testing purposes only
-		Serial.print("Control Register 1[1] value: ");
-		Serial.println(cfr1[1], BIN);
-		Serial.print("Control Register 1[2] value: ");
-		Serial.println(cfr1[2], BIN);
+		//Serial.print("Control Register 1[1] value: ");
+		//Serial.println(cfr1[1], BIN);
+		//Serial.print("Control Register 1[2] value: ");
+		//Serial.println(cfr1[2], BIN);
 	}
 	else
 	{
@@ -349,10 +349,10 @@ void AD9910::OSKenable(int mode)
 }
 
 void AD9910::OSKdisable()
-{
+{	//turn off control register 1 bit 9
 	cfr1[2] = cfr1[2] & 0xFD;
 	//for testing purposes only
-	Serial.print("Control Register 1[2] value: ");
-	Serial.println(cfr1[2],BIN);
+	//Serial.print("Control Register 1[2] value: ");
+	//Serial.println(cfr1[2],BIN);
 	update();
 }
