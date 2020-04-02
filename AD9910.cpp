@@ -20,7 +20,8 @@ uint8_t Profile0[8] = { 0x08, 0xB5, 0x00, 0x00, 0x14, 0x7A, 0xE1, 0x48 }; //Sing
 uint8_t SweepLimits[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //First 4 bytes make upper limit FTW, last 4 lower limit FTW. 
 uint8_t FreqStepSize[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //First 4 bytes make decrement size FTW, last 4 increment size FTW.
 uint8_t TimeStepSize[4] = { 0x00, 0x00, 0x00, 0x00 }; // First 2 bytes are decrement time step tuning word, last 2 increment time step tuning word.
-
+//Amplitude Scale Factor Register 0x09
+uint8_t ASF[4] = {0x00, 0x00, 0xFF, 0xFF}; //Defaults with max amplitude and step size. ramp rate set to 0...
 
 AD9910::AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst, int sTrig) //this defines which pins are which via integer corresponding to pin number on the arduino board
 {
@@ -155,7 +156,7 @@ void AD9910::prep_freq(double freq, uint8_t profile)
 void AD9910::set_Amp(double amp, uint8_t profile) //Function to set amplitude for a profile in single frequency mode
 {
 	unsigned long temp;
-	temp = (unsigned long)amp * 25.20615385; //amplitude tuning word.. need to check math and need to make this a global variable
+	temp = (unsigned long)amp * 25.20615385; //amplitude tuning word.. need to check math and need to make this a global variable.. not sure where 25 is coming from
 	if (temp > 0x3FFF) {
 		temp = 0x3FFF;
 	}
@@ -367,4 +368,30 @@ void AD9910::OSKdisable()
 	//Serial.print("Control Register 1[2] value: ");
 	//Serial.println(cfr1[2],BIN);
 	update();
+}
+
+void AD9910::setAmpScaleFactor(double amplitude)
+{
+	// amplitude scale = ASF/2^14
+	// invert to find ASF given amplitude scale. Max amplitude scale of 1, ASF = 2^14
+	// 2^14 = 16384
+	unsigned long temp;
+	temp = (unsigned long)amplitude * 16384;
+	uint8_t byteholder;
+	if (temp > 0x3FFF)
+	{
+		temp = 0x3FFF;
+	}
+	ASF[2] = (uchar)(temp >> 16); // see set_freq for similar syntax
+	//Only bits 15:2 are used in setting amplitude. Need to make sure we do not overwrite bits 0 and 1 out of byte 7:0.
+	byteholder = (uchar)(temp >> 24);
+	byteholder &= 0xFC;
+	ASF[3] &= 0x03;
+	ASF[3] |= byteholder;
+	SPI_Write_Reg(0x09, ASF, 4);
+	update();
+}
+
+void AD9910::setOSKRampRate()
+{
 }
