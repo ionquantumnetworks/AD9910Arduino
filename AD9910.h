@@ -93,6 +93,15 @@ public:
 	void freqSweepParameters(double ULim, double LLim, double stepsizeDown, double stepsizeUp, double timeStepDown, double timeStepUp);
 
 	void rampReset();
+
+	//OSK enable function
+	//mode 0 = manual
+	//mode 1 = auto
+	//in either case, OSK pin is enabled. To disable it, one needs to turn off bit 23 in CFR1. We want it on for everything in the lab so far.
+	//I believe that it will always be on for Automatic mode.
+	void OSKenable(int mode = 0);
+
+	void OSKdisable();
 };
 
 //For Frequency Sweep, functions that need to change: 

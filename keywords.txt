@@ -13,3 +13,5 @@ ampSweepMode	KEYWORD2
 phaseSweepMode	KEYWORD2
 freqSweepParameters KEYWORD2
 rampReset KEYWORD2
+OSKdisable KEYWORD2
+OSKenable KEYWORD2

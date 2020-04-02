@@ -168,20 +168,23 @@ void AD9910::set_Amp(double amp, uint8_t profile) //Function to set amplitude fo
 }
 
 void AD9910::freqSweepMode(int mode)
-{
-	if (mode = 0)
+{	//mode 0 = default mode
+	//mode 1 = no dwell high
+	//mode 2 = no dwell low
+	//mode 3 = oscillatory
+	if (mode == 0)
 	{
 		cfr2[2] = 0x08;
 	}
-	else if (mode = 1)
+	else if (mode == 1)
 	{
-		cfr2[2] = 0x0C;
+		cfr2[2] == 0x0C;
 	}
-	else if (mode = 2)
+	else if (mode == 2)
 	{
-		cfr2[2] = 0x0A;
+		cfr2[2] == 0x0A;
 	}
-	else if (mode = 3)
+	else if (mode == 3)
 	{
 		cfr2[2] = 0x0E;
 	}
@@ -310,3 +313,44 @@ void AD9910::rampReset()
 	SPI_Write_Reg(0x00, cfr1, 4);
 	update();
 } //Reset ramp using digiatl ramp accumluator reset set bit 12 of CFR1 to 1 then do I/O update, then set back to 0 and I/O update
+
+void AD9910::OSKenable(int mode)
+{	//OSK enable function
+	//mode 0 = manual
+	//mode 1 = auto
+	if (mode == 0)
+	{
+		cfr1[1] = cfr1[1] | 0x80;
+		cfr1[2] = cfr1[2] | 0x02;
+		cfr1[2] = cfr1[2] & 0xFE;
+		SPI_Write_Reg(0x00, cfr1, 4);
+		//for testing purposes only
+		Serial.print("Control Register 1[1] value: ");
+		Serial.println(cfr1[1], BIN);
+		Serial.print("Control Register 1[2] value: ");
+		Serial.println(cfr1[2], BIN);
+	}
+	else if (mode == 1)
+	{
+		cfr1[2] = cfr1[2] | 0x03;
+		SPI_Write_Reg(0x00, cfr1, 4);
+		//for testing purposes only
+		Serial.print("Control Register 1[1] value: ");
+		Serial.println(cfr1[1], BIN);
+		Serial.print("Control Register 1[2] value: ");
+		Serial.println(cfr1[2], BIN);
+	}
+	else
+	{
+		Serial.println("Invalid Mode");
+		return;
+	}
+}
+
+void AD9910::OSKdisable()
+{
+	cfr1[2] = cfr1[2] & 0xFD;
+	//for testing purposes only
+	Serial.print("Control Register 1[2] value: ");
+	Serial.println(cfr1[2],BIN);
+}
