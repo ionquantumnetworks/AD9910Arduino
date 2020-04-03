@@ -107,14 +107,7 @@ public:
 
 	void OSKdisable();
 
-	void setAmpScaleFactor();
+	void setAmpScaleFactor(double amplitude); //Still needs to be tested
 
-	void setOSKRampRate();
+	void setOSKRampRate(); //only needed for automatic mode
 };
-
-//For Frequency Sweep, functions that need to change: 
-// -initialize
-// -optional trigger pin (5) -- done in header
-// -potentially set_freq and set_amp need to be edited to do nothing if sweep mode is enabled. It is possible you can still set profiles even while in sweep mode... I will check via trial and error
-// hmm maybe I should make functions to turn on/off sweep mode or single frequency mode. such as singleFreqMode() and sweepMode(). sweepMode() can contain variables having to do with certain registers such as OSK.. I think that is tomorrow's job
-// We may want the arduino to connect to the RF switches when applicable

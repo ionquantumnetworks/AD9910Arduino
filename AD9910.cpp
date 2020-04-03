@@ -370,10 +370,10 @@ void AD9910::OSKdisable()
 	update();
 }
 
-void AD9910::setAmpScaleFactor(double amplitude)
+void AD9910::setAmpScaleFactor(double amplitude) //still needs to be tested.
 {
-	// amplitude scale = ASF/2^14
-	// invert to find ASF given amplitude scale. Max amplitude scale of 1, ASF = 2^14
+	// amplitude scale = ASF/(2^14-1)
+	// invert to find ASF given amplitude scale. Max amplitude scale of 1, ASF = (2^14-1)
 	// 2^14 = 16384
 	unsigned long temp;
 	temp = (unsigned long)amplitude * 16384;
@@ -385,13 +385,14 @@ void AD9910::setAmpScaleFactor(double amplitude)
 	ASF[2] = (uchar)(temp >> 16); // see set_freq for similar syntax
 	//Only bits 15:2 are used in setting amplitude. Need to make sure we do not overwrite bits 0 and 1 out of byte 7:0.
 	byteholder = (uchar)(temp >> 24);
-	byteholder &= 0xFC;
-	ASF[3] &= 0x03;
+	byteholder &= 0xFC;//turn off bits 0 and 1
+	ASF[3] &= 0x03;//Turn off all bits except 0 and 1
 	ASF[3] |= byteholder;
 	SPI_Write_Reg(0x09, ASF, 4);
 	update();
 }
 
+//still needs to be written.
 void AD9910::setOSKRampRate()
-{
+{//Needed only for automatic mode.
 }
