@@ -6,7 +6,7 @@
 #pragma once //Makes sure this file is included only once in  a single compilation.
 
 # define uchar unsigned char //specifying shorthand for unsigned charater
-# define CLOCKSPEED  25000000//Clockspeed used for SPI serial communication between arduino and AD9910... setting to 15 MHz... James had it at 25 MHz - should check
+# define CLOCKSPEED  16000000//Clockspeed used for SPI serial communication between arduino and AD9910... setting to 15 MHz... James had it at 25 MHz - should check
 # define FTWConst 8.589934592 // constant needed to calculate frequency tuning word using 1 GHz clock "fref" divided by 2 into 500 MHz "fsysclock"
 # define TTWConst 125000000 // constant used to calculate time step. equal to fsysclock/4 or 500 MHz/ 4 = 125 MHz.
 
