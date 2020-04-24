@@ -123,7 +123,7 @@ void AD9910::singleFreqMode()
 	update();
 }
 
-void AD9910::set_freq(double freq, uint8_t profile) //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in Hz
+void AD9910::set_freq(unsigned long freq, uint8_t profile) //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in 0.1 Hz
 {
 	if (profile > 7) { //protection against a impossible profile number
 		Serial.println(F("Invalid Profile Number."));
@@ -133,7 +133,7 @@ void AD9910::set_freq(double freq, uint8_t profile) //default profile set to 0. 
 	if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
 		freq = 200000000;
 	}
-	temp = freq * FTWConst;//8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
+	temp = freq * 4294967296/DDSCLOCK/10;//8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
 
 	Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
 	Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
@@ -144,7 +144,7 @@ void AD9910::set_freq(double freq, uint8_t profile) //default profile set to 0. 
 	update();
 }
 
-void AD9910::prep_freq(double freq, uint8_t profile)
+void AD9910::prep_freq(unsigned long freq, uint8_t profile)
 {
 	if (profile > 7) { //protection against a impossible profile number.. need to make this work for negative or invalid data types as well..
 		Serial.println(F("Invalid Profile Number."));
@@ -154,7 +154,7 @@ void AD9910::prep_freq(double freq, uint8_t profile)
 	if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
 		freq = 200000000;
 	}
-	temp = freq * FTWConst;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
+	temp = freq * 4294967296/DDSCLOCK/10;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
 
 	Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
 	Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
@@ -220,7 +220,7 @@ void AD9910::freqSweepMode(int mode)
 
 }
 
-void AD9910::freqSweepParameters(double ULim, double LLim, double stepsizeDown, double stepsizeUp, double timeStepDown, double timeStepUp)
+void AD9910::freqSweepParameters(unsigned long ULim, unsigned long LLim, unsigned long stepsizeDown, unsigned long stepsizeUp, unsigned long timeStepDown, unsigned long timeStepUp)
 {
 	//Keep values within bounds defined by our reference clock divided by 2 (known as SYSCLOCK)
 	if (ULim > 200000000 || ULim < 0)
@@ -287,10 +287,10 @@ void AD9910::freqSweepParameters(double ULim, double LLim, double stepsizeDown, 
 	unsigned long tempTU;
 	//calcuation of tuning words
 	//frequency
-	tempUL = ULim * FTWConst;
-	tempLL = LLim * FTWConst;
-	tempSD = stepsizeDown * FTWConst;
-	tempSU = stepsizeUp * FTWConst;
+	tempUL = ULim * 4294967296 / DDSCLOCK / 10;
+	tempLL = LLim * 4294967296 / DDSCLOCK / 10;
+	tempSD = stepsizeDown * 4294967296 / DDSCLOCK / 10;
+	tempSU = stepsizeUp * 4294967296 / DDSCLOCK / 10;
 	//time
 	tempTD = timeStepDown * TTWConst;
 	tempTU = timeStepUp * TTWConst;
