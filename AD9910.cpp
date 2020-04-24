@@ -118,8 +118,8 @@ void AD9910::singleFreqMode()
 	cfr1[0] = cfr1[0] & 0x7F; //turn off bit 31, aka bit 8 of the first array element.
 	cfr2[1] = cfr2[1] & 0xF7; //turn off bit 19 of cfr2, aka bit 3 of the second array element.
 	cfr2[3] = cfr2[3] & 0xEF; //turn off bit 4 of cfr2, aka bit 4 of the first array element
-	SPI_Write_Reg(0x00, cfr1);//write bit changes to AD9910
-	SPI_Write_Reg(0x01, cfr2);
+	SPI_Write_Reg(0x00, cfr1, 4);//write bit changes to AD9910
+	SPI_Write_Reg(0x01, cfr2, 4);
 	update();
 }
 

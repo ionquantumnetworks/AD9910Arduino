@@ -63,11 +63,11 @@ public:
 
 	//Function to set frequency for a profile in single frequency mode
 
-	void set_freq(double freq, uint8_t profile = 0); //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in Hz
+	void set_freq(unsigned long freq, uint8_t profile = 0); //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in Hz
 
 	//A function we may need, that preps a profile to be rewritten, but does not send an update command.  
 
-	void prep_freq(double freq, uint8_t profile = 0);
+	void prep_freq(unsigned long freq, uint8_t profile = 0);
 
 	//Function to set amplitude for a profile in single frequency mode
 
@@ -96,7 +96,7 @@ public:
 	//Allow for frequency sweep paramters to be changed independently of turning the sweep on?
 	//Do global amplitude/phase settings apply here?
 
-	void freqSweepParameters(double ULim, double LLim, double stepsizeDown, double stepsizeUp, double timeStepDown, double timeStepUp);
+	void freqSweepParameters(unsigned long ULim, unsigned long LLim, unsigned long stepsizeDown, unsigned long stepsizeUp, unsigned long timeStepDown, unsigned long timeStepUp);
 
 	void rampReset();
 
