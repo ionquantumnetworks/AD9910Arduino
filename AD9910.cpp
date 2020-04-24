@@ -112,10 +112,21 @@ void AD9910::initialize()
 	delay(5);
 }
 
+void AD9910::singleFreqMode()
+{
+	//need CFR1[31] = 0, CFR2[19] = 0, CFR2[4] = 0.
+	cfr1[0] = cfr1[0] & 0x7F; //turn off bit 31, aka bit 8 of the first array element.
+	cfr2[1] = cfr2[1] & 0xF7; //turn off bit 19 of cfr2, aka bit 3 of the second array element.
+	cfr2[3] = cfr2[3] & 0xEF; //turn off bit 4 of cfr2, aka bit 4 of the first array element
+	SPI_Write_Reg(0x00, cfr1);//write bit changes to AD9910
+	SPI_Write_Reg(0x01, cfr2);
+	update();
+}
+
 void AD9910::set_freq(double freq, uint8_t profile) //default profile set to 0. freq as a double allows for 64 bit precision // put frequency in Hz
 {
 	if (profile > 7) { //protection against a impossible profile number
-		Serial.println("Invalid Profile Number.");
+		Serial.println(F("Invalid Profile Number."));
 		return;
 	}
 	unsigned long temp; //temp variable for frequency calculations
@@ -136,7 +147,7 @@ void AD9910::set_freq(double freq, uint8_t profile) //default profile set to 0. 
 void AD9910::prep_freq(double freq, uint8_t profile)
 {
 	if (profile > 7) { //protection against a impossible profile number.. need to make this work for negative or invalid data types as well..
-		Serial.println("Invalid Profile Number.");
+		Serial.println(F("Invalid Profile Number."));
 		return;
 	}
 	unsigned long temp; //temp variable for frequency calculations
@@ -198,7 +209,7 @@ void AD9910::freqSweepMode(int mode)
 	}
 	else
 	{
-		Serial.println("Invalid mode selection, will go to default sweep mode.");
+		Serial.println(F("Invalid mode selection, will go to default sweep mode."));
 		cfr2[1] = cfr2[1] | 0x08; //turn on bit 3
 		cfr2[1] = cfr2[1] & 0xF9; //turn off bits 2 and 1
 		//cfr2[1] = 0x08;//old way of rewriting entire register.
@@ -215,56 +226,56 @@ void AD9910::freqSweepParameters(double ULim, double LLim, double stepsizeDown, 
 	if (ULim > 200000000 || ULim < 0)
 	{
 		ULim = 200000000;
-		Serial.println("Upper Limit out of bounds, setting to 200 MHz");
+		Serial.println(F("Upper Limit out of bounds, setting to 200 MHz"));
 	}
 	if (LLim > 200000000 || LLim < 0)
 	{
 		LLim = 0;
-		Serial.println("Lower Limit out of bounds, setting to 0 MHz");
+		Serial.println(F("Lower Limit out of bounds, setting to 0 MHz"));
 	}
 	if (stepsizeDown > 200000000)
 	{
 		stepsizeDown = 200000000;
-		Serial.println("Step size down too large, setting to 200 MHz");
+		Serial.println(F("Step size down too large, setting to 200 MHz"));
 	}
 	if (stepsizeUp > 200000000)
 	{
 		stepsizeUp = 200000000;
-		Serial.println("Step size up too large, setting to 200 MHz");
+		Serial.println(F("Step size up too large, setting to 200 MHz"));
 	}
 	if (stepsizeDown < 0.11641532182)
 	{
 		stepsizeDown = 0.11641532182;
-		Serial.println("Step size down too small, setting to 0.11641532182 Hz");
+		Serial.println(F("Step size down too small, setting to 0.11641532182 Hz"));
 	}
 	if (stepsizeUp < 0.11641532182)
 	{
 		stepsizeUp = 0.11641532182;
-		Serial.println("Step size up too small, setting to 0.11641532182 Hz");
+		Serial.println(F("Step size up too small, setting to 0.11641532182 Hz"));
 	}
 	if (timeStepDown > 0.000524288)
 	{
 		timeStepDown = 0.000524288;
-		Serial.println("Decrement time step too small, setting to 524.288 us");
+		Serial.println(F("Decrement time step too small, setting to 524.288 us"));
 	}
 	if (timeStepUp > 0.000524288)
 	{
 		timeStepUp = 0.000524288;
-		Serial.println("Increment time step too small, setting to 524.288 us");
+		Serial.println(F("Increment time step too small, setting to 524.288 us"));
 	}
 	if (timeStepDown < 0.000000008)
 	{
 		timeStepDown = 0.000000008;
-		Serial.println("Decrement time step too small, setting to 8 ns");
+		Serial.println(F("Decrement time step too small, setting to 8 ns"));
 	}
 	if (timeStepUp < 0.000000008)
 	{
 		timeStepUp = 0.000000008;
-		Serial.println("Increment time step too small, setting to 8 ns");
+		Serial.println(F("Increment time step too small, setting to 8 ns"));
 	}
 	if (LLim > ULim)
 	{
-		Serial.println("Lower limit is larger than upper limit... expect weird stuff.");
+		Serial.println(F("Lower limit is larger than upper limit... expect weird stuff."));
 	}
 	//calculation of tuning words using temp variables... separate variables for diagnostics.. could just redefine a single variable after each calculation
 	//UL - upper limit, LL - lower limit, SD - stepsize down, SU - stepsize up, TD - timestep down, TU - timestep up
@@ -355,7 +366,7 @@ void AD9910::OSKenable(int mode)
 	}
 	else
 	{
-		Serial.println("Invalid Mode");
+		Serial.println(F("Invalid Mode"));
 		return;
 	}
 	update();
