@@ -6,7 +6,7 @@
 #pragma once //Makes sure this file is included only once in  a single compilation.
 
 # define uchar unsigned char //specifying shorthand for unsigned charater
-# define CLOCKSPEED  16000000//Clockspeed used for SPI serial communication between arduino and AD9910... setting to 15 MHz... James had it at 25 MHz - should check
+# define CLOCKSPEED  25000000//Clockspeed used for SPI serial communication between arduino and AD9910... setting to 15 MHz... James had it at 25 MHz - should check
 # define FTWConst 8.589934592 // constant needed to calculate frequency tuning word using 1 GHz clock "fref" divided by 2 into 500 MHz "fsysclock"
 # define TTWConst 125000000 // constant used to calculate time step. equal to fsysclock/4 or 500 MHz/ 4 = 125 MHz.
 # define DDSCLOCK 500000000
@@ -19,19 +19,19 @@ class AD9910
 {
 public:
 	int _cs, _rst, _update, _sdio, _sclk, _mrst, _sTrig; //slave selection pin (pin 10, should be low for slave you are writing to), reset, update, serial data input output , system clock , master reset, sweep trigger// can probably be private....
-	//Control and general settings registers
-	uint8_t cfr1[4]; 
-	uint8_t cfr2[4]; 
-	uint8_t cfr3[4];
-	uint8_t DAC_config[4];
-	uint8_t Profile0[8];
-	//Sweep registers
-	uint8_t SweepLimits[8]; //First 4 bytes make upper limit FTW, last 4 lower limit FTW. 
-	uint8_t FreqStepSize[8]; //First 4 bytes make decrement size FTW, last 4 increment size FTW.
-	uint8_t TimeStepSize[4]; // First 2 bytes are decrement time step tuning word, last 2 increment time step tuning word.
+	////Control and general settings registers
+	//extern uint8_t cfr1[4];
+	//extern uint8_t cfr2[4];
+	//extern uint8_t cfr3[4];
+	//extern uint8_t DAC_config[4];
+	//extern uint8_t Profile0[8];
+	////Sweep registers
+	//extern uint8_t SweepLimits[8]; //First 4 bytes make upper limit FTW, last 4 lower limit FTW. 
+	//extern uint8_t FreqStepSize[8]; //First 4 bytes make decrement size FTW, last 4 increment size FTW.
+	//extern uint8_t TimeStepSize[4]; // First 2 bytes are decrement time step tuning word, last 2 increment time step tuning word.
 
-	//Amplitude Scale Factor Register 0x09
-	uint8_t ASF[4];
+	////Amplitude Scale Factor Register 0x09
+	//extern uint8_t ASF[4];
 
 //Constructor
 	AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst, int sTrig); //this defines which pins are which via integer corresponding to a pin on the arduino board

@@ -15,7 +15,7 @@ uint8_t cfr2[4] = { 0x01, 0x00, 0x08, 0x20 }; //Define Control Function Register
 uint8_t cfr3[4] = { 0x1F, 0x3F, 0x40, 0x00 }; //Define Control Function Register 3 default values as originally figured out by James
 uint8_t DAC_config[4] = { 0x00, 0x00, 0x00, 0x7F }; //Onboard Auxillary DAC control register, default is 0x7F
 //Single Frequency Register
-uint8_t Profile0[8] = { 0x08, 0xB5, 0x00, 0x00, 0x14, 0x7A, 0xE1, 0x48 }; //Single Frequency or RAM profile, depending on control register settings. Bytes organized as :{amplitude, amplitude, phase, phase, freq, freq, freq ,freq}
+uint8_t Profile0[8] = { 0x08, 0xB5, 0x00, 0x00, 0x14, 0x7A, 0xE1, 0x47 }; //Single Frequency or RAM profile, depending on control register settings. Bytes organized as :{amplitude, amplitude, phase, phase, freq, freq, freq ,freq}
 //Sweep registers
 uint8_t SweepLimits[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //First 4 bytes make upper limit FTW, last 4 lower limit FTW. 
 uint8_t FreqStepSize[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //First 4 bytes make decrement size FTW, last 4 increment size FTW.
@@ -32,6 +32,7 @@ AD9910::AD9910(int cs, int rst, int update, int sdio, int sclk, int mrst, int sT
 	_sclk = sclk;
 	_mrst = mrst;
 	_sTrig = sTrig;
+
 }
 
 void AD9910::begin()
@@ -58,6 +59,13 @@ void AD9910::begin()
 	delay(5);
 	initialize();
 	delay(5);
+	//Serial.println(F("Profile0: "));
+	//Serial.println(Profile0[7]);
+	//Serial.println(Profile0[6]);
+	//Serial.println(Profile0[5]);
+	//Serial.println(Profile0[4]);
+	//SPI_Write_Reg(0x0E + 0, Profile0, 8);
+	//update();
 	//WE SHOULD PLAY WITH REMOVING THE DELAYS AT SOME POINT
 }
 
@@ -79,6 +87,8 @@ void AD9910::reset()
 void AD9910::update()
 {
 	//High on update pin transfers the contents of the I/O buffers in the 9910 to the proper internal registers
+	//Serial.println(F("Updating AD9910"));
+	//Serial.println(_update);
 	digitalWrite(_update, HIGH);
 	delay(5);
 	digitalWrite(_update, LOW);
@@ -86,6 +96,8 @@ void AD9910::update()
 
 void AD9910::SPI_Write_Reg(uint8_t addr, uint8_t bytes[], uint8_t num_bytes) //addr corresponds to the serial addresses or register names given in the AD9910 manual, just use the hex to designate what register you want to change
 {
+	//Serial.print(F("Writing at a clockspeed of: "));
+	//Serial.println(CLOCKSPEED);
 	SPI.beginTransaction(SPISettings(CLOCKSPEED, MSBFIRST, SPI_MODE0)); //code from xxx uses mode0, James used MODE 2 - should check 
 	digitalWrite(_cs, LOW);
 	SPI.transfer(addr); //First byte of transfer selects which register we are writing to
@@ -108,6 +120,7 @@ void AD9910::initialize()
 	delay(5);
 	SPI_Write_Reg(0x03, DAC_config, 4); //James doesn't have this in his code.. not sure how necessary
 	delay(5);
+	SPI_Write_Reg(0x09, ASF, 4);
 	update(); //transfer from buffer to internal register
 	delay(5);
 }
@@ -130,16 +143,20 @@ void AD9910::set_freq(unsigned long freq, uint8_t profile) //default profile set
 		return;
 	}
 	unsigned long temp; //temp variable for frequency calculations
-	if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
-		freq = 200000000;
+	if (freq > 2000000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
+		freq = 2000000000;
 	}
 	temp = freq * 4294967296/DDSCLOCK/10;//8.589934592;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
-
+	//Serial.println(temp);
+	//Serial.println(freq);
 	Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
 	Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
 	Profile0[5] = (uchar)(temp >> 16);
 	Profile0[4] = (uchar)(temp >> 24);
-
+	//Serial.println(Profile0[7], BIN);
+	//Serial.println(Profile0[6], BIN);
+	//Serial.println(Profile0[5], BIN);
+	//Serial.println(Profile0[4], BIN);
 	SPI_Write_Reg(0x0E + profile, Profile0, 8);
 	update();
 }
@@ -154,7 +171,7 @@ void AD9910::prep_freq(unsigned long freq, uint8_t profile)
 	if (freq > 200000000) {//protection against too big of a frequency - setting to 200 MHz for now - AOM designed for 40 MHz anyway
 		freq = 200000000;
 	}
-	temp = freq * 4294967296/DDSCLOCK/10;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
+	temp = freq * 4294967296 / DDSCLOCK;//10;//4.294967296; //uses our clock frequency of 1 GHz with a divider of 2, and includes 2^32
 
 	Profile0[7] = (uchar)temp; //uchar will only ever take the last byte of a number's binary representation. We then need to take our frequency tuning word, temp, in byte sized steps before sending to AD9910 via SPI
 	Profile0[6] = (uchar)(temp >> 8); //shifts binary representation 8 bits to the right, or one byte, and we then take the last byte to send to AD9910
@@ -342,6 +359,7 @@ void AD9910::OSKenable(int mode)
 {	//OSK enable function
 	//mode 0 = manual
 	//mode 1 = auto
+	//Serial.println(F("OSK ENABLED"));
 	if (mode == 0)
 	{	//Turn on control register 1 bits 23 and 9, turn off bit 8
 		cfr1[1] = cfr1[1] | 0x80;
@@ -383,22 +401,31 @@ void AD9910::OSKdisable()
 
 void AD9910::setAmpScaleFactor(double amplitude) //still needs to be tested.
 {
+	//Serial.println("Here");
 	// amplitude scale = ASF/(2^14-1)
 	// invert to find ASF given amplitude scale. Max amplitude scale of 1, ASF = (2^14-1)
 	// 2^14 = 16384
 	unsigned long temp;
-	temp = (unsigned long)amplitude * 16384;
+	temp = (unsigned long)amplitude * 16384/100;
+	Serial.println(temp);
 	uint8_t byteholder;
 	if (temp > 0x3FFF)
 	{
 		temp = 0x3FFF;
 	}
-	ASF[2] = (uchar)(temp >> 16); // see set_freq for similar syntax
+	Serial.println((uchar)(temp >> 8),HEX);
+	ASF[2] = (uchar)(temp >> 6); // see set_freq for similar syntax
 	//Only bits 15:2 are used in setting amplitude. Need to make sure we do not overwrite bits 0 and 1 out of byte 7:0.
-	byteholder = (uchar)(temp >> 24);
+	byteholder = (uchar)(temp);
 	byteholder &= 0xFC;//turn off bits 0 and 1
 	ASF[3] &= 0x03;//Turn off all bits except 0 and 1
 	ASF[3] |= byteholder;
+	//Serial.println(byteholder);
+	//Serial.println(":(");
+	//ASF[2] = 0x50;
+	//ASF[3] = 0xFC;
+	Serial.println(ASF[2],HEX);
+	Serial.println(ASF[3],HEX);
 	SPI_Write_Reg(0x09, ASF, 4);
 	update();
 }
