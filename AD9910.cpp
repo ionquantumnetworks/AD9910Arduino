@@ -10,8 +10,8 @@
 
 //Defining Control Register Default Values and Initilizing size
 //Control and general settings registers
-uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x00 }; //what may be causing unwated jumps in signal is the 0x20 which makes the phase accumlator reset on updates. Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
-uint8_t cfr2[4] = { 0x01, 0x00, 0x08, 0x20 }; //Define Control Function Register 2 default values as originally figured out by James
+uint8_t cfr1[4] = { 0x00, 0x40, 0x20, 0x02 }; //what may be causing unwated jumps in signal is the 0x20 which makes the phase accumlator reset on updates. Define Control Function Register 1 default values as originally figured out by James - see page 49/64 and 54/64 of AD9910 manual
+uint8_t cfr2[4] = { 0x00, 0x00, 0x08, 0x20 }; //Define Control Function Register 2 default values as originally figured out by James
 uint8_t cfr3[4] = { 0x1F, 0x3F, 0x40, 0x00 }; //Define Control Function Register 3 default values as originally figured out by James
 uint8_t DAC_config[4] = { 0x00, 0x00, 0x00, 0x7F }; //Onboard Auxillary DAC control register, default is 0x7F
 //Single Frequency Register
@@ -237,37 +237,37 @@ void AD9910::freqSweepMode(int mode)
 
 }
 
-void AD9910::freqSweepParameters(unsigned long ULim, unsigned long LLim, unsigned long stepsizeDown, unsigned long stepsizeUp, unsigned long timeStepDown, unsigned long timeStepUp)
+void AD9910::freqSweepParameters(unsigned long ULim, unsigned long LLim, unsigned long stepsizeDown, unsigned long stepsizeUp, double timeStepDown, double timeStepUp)
 {
 	//Keep values within bounds defined by our reference clock divided by 2 (known as SYSCLOCK)
-	if (ULim > 200000000 || ULim < 0)
+	if (ULim > 2000000000 || ULim < 0)
 	{
-		ULim = 200000000;
+		ULim = 2000000000;
 		Serial.println(F("Upper Limit out of bounds, setting to 200 MHz"));
 	}
-	if (LLim > 200000000 || LLim < 0)
+	if (LLim > 2000000000 || LLim < 0)
 	{
 		LLim = 0;
 		Serial.println(F("Lower Limit out of bounds, setting to 0 MHz"));
 	}
-	if (stepsizeDown > 200000000)
+	if (stepsizeDown > 2000000000)
 	{
-		stepsizeDown = 200000000;
+		stepsizeDown = 2000000000;
 		Serial.println(F("Step size down too large, setting to 200 MHz"));
 	}
-	if (stepsizeUp > 200000000)
+	if (stepsizeUp > 2000000000)
 	{
-		stepsizeUp = 200000000;
+		stepsizeUp = 2000000000;
 		Serial.println(F("Step size up too large, setting to 200 MHz"));
 	}
-	if (stepsizeDown < 0.11641532182)
+	if (stepsizeDown < 0.11641532182*10)
 	{
-		stepsizeDown = 0.11641532182;
+		stepsizeDown = 0.11641532182*10;
 		Serial.println(F("Step size down too small, setting to 0.11641532182 Hz"));
 	}
-	if (stepsizeUp < 0.11641532182)
+	if (stepsizeUp < 0.11641532182*10)
 	{
-		stepsizeUp = 0.11641532182;
+		stepsizeUp = 0.11641532182*10;
 		Serial.println(F("Step size up too small, setting to 0.11641532182 Hz"));
 	}
 	if (timeStepDown > 0.000524288)
@@ -333,13 +333,25 @@ void AD9910::freqSweepParameters(unsigned long ULim, unsigned long LLim, unsigne
 
 	TimeStepSize[3] = (uchar)tempTU;
 	TimeStepSize[2] = (uchar)(tempTU >> 8);
-	TimeStepSize[1] = (uchar)(tempTU >> 16);
-	TimeStepSize[0] = (uchar)(tempTU >> 24);
-
+	TimeStepSize[1] = (uchar)(tempTD);
+	TimeStepSize[0] = (uchar)(tempTD >> 8);
+	//Serial.println(tempSD);
+	//Serial.println(FreqStepSize[7], BIN);
+	//Serial.println(FreqStepSize[6], BIN);
+	//Serial.println(FreqStepSize[5], BIN);
+	//Serial.println(FreqStepSize[4], BIN);
+	//Serial.println(FreqStepSize[3], BIN);
+	//Serial.println(FreqStepSize[2], BIN);
+	//Serial.println(FreqStepSize[1], BIN);
+	//Serial.println(FreqStepSize[0], BIN);
 	SPI_Write_Reg(0x0B, SweepLimits, 8);
 	SPI_Write_Reg(0x0C, FreqStepSize, 8);
-	SPI_Write_Reg(0x0D, TimeStepSize, 8);
+	SPI_Write_Reg(0x0D, TimeStepSize, 4);
 	//update() may go here in the future
+	//Serial.print(TimeStepSize[3],HEX);
+	//Serial.print(TimeStepSize[2],HEX);
+	//Serial.print(TimeStepSize[1],HEX);
+	//Serial.print(TimeStepSize[0],HEX);
 	update();
 }
 

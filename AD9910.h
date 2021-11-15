@@ -96,7 +96,7 @@ public:
 	//Allow for frequency sweep paramters to be changed independently of turning the sweep on?
 	//Do global amplitude/phase settings apply here?
 
-	void freqSweepParameters(unsigned long ULim, unsigned long LLim, unsigned long stepsizeDown, unsigned long stepsizeUp, unsigned long timeStepDown, unsigned long timeStepUp);
+	void freqSweepParameters(unsigned long ULim, unsigned long LLim, unsigned long stepsizeDown, unsigned long stepsizeUp, double timeStepDown, double timeStepUp);
 
 	void rampReset();
 
